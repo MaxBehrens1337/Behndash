@@ -1,35 +1,14 @@
 "use client"
 
-import type React from "react"
-
-import { useState, useEffect, useMemo } from "react"
+import React, { useState, useEffect, useMemo } from "react"
 import { ChevronLeft, ChevronRight, CalendarIcon, Info, X } from "lucide-react"
 import { useTheme } from "@/contexts/theme-context"
 
-import type { CityFestival } from './festival-dashboard'; // Import CityFestival type
-
-// Typen für die Festivals und Props
-interface Festival { // Existing Festival type
-  id: number
-  name: string
-  location: string
-  plz: string
-  date: string
-  month: number
-  duration: number
-  genre: string
-  visitors: number
-  instaFollowers: number
-  region: string
-  website: string
-  contact: string
-  festivalType: string
-  description: string
-}
+import type { Festival, CityFestival } from './festival-dashboard'; // Import types
 
 // Combined event type for calendar
-type CalendarEvent = 
-  | (Festival & { eventType: 'festival' }) 
+type CalendarEvent =
+  | (Festival & { eventType: 'festival' })
   | (CityFestival & { eventType: 'cityFestival' });
 
 
@@ -432,9 +411,6 @@ const FestivalCalendar: React.FC<FestivalCalendarProps> = ({
                       {selectedDay}. {monthName} {year}
                     </h3>
                     <div className="mt-4">
-                      {festivalsByDay[selectedDay]?.length > 0 ? (
-                        <div className="space-y-2">
-                          <p className="text-sm text-gray-500 dark:text-gray-400">
                       {eventsByDay[selectedDay]?.length > 0 ? (
                         <div className="space-y-2">
                           <p className="text-sm text-gray-500 dark:text-gray-400">
@@ -491,8 +467,8 @@ const FestivalCalendar: React.FC<FestivalCalendarProps> = ({
                                   </div>
                                 </div>
                               ))}
-                                  </div>
-                                </div>
+                            </div>
+                          </div>
                         </div>
                       ) : (
                         <p className="text-sm text-gray-500 dark:text-gray-400">

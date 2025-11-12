@@ -1,8 +1,6 @@
 "use client"
 
-import type React from "react"
-
-import { useState, useEffect, useRef, useMemo, useCallback } from "react"
+import React, { useState, useEffect, useRef, useMemo, useCallback } from "react"
 import {
   BarChart,
   Bar,
@@ -69,7 +67,7 @@ const EventsMap = dynamic(() => import('./events-map'), {
 });
 
 // Typdefinitionen
-interface Festival {
+export interface Festival {
   id: number
   name: string
   location: string
@@ -85,10 +83,12 @@ interface Festival {
   contact: string
   festivalType: string
   description: string
+  lat: number | null
+  lon: number | null
 }
 
 // Added CityFestival Interface
-interface CityFestival {
+export interface CityFestival {
   id: number;
   bundesland: string;
   stadt: string;
@@ -260,7 +260,7 @@ const FestivalDashboard: React.FC = () => {
   const [isFiltering, setIsFiltering] = useState(false)
 
   // Refs
-  const tableRef = useRef<HTMLDivElement>(null)
+  const tableRef = useRef<HTMLTableElement>(null)
   const searchInputRef = useRef<HTMLInputElement>(null)
 
   // Lade Favoriten aus dem localStorage
@@ -931,6 +931,12 @@ const FestivalDashboard: React.FC = () => {
           currentFilteredFestivals.sort((a, b) => {
             const valA = a[sortConfig.key as keyof Festival];
             const valB = b[sortConfig.key as keyof Festival];
+
+            // Handle null values
+            if (valA === null && valB === null) return 0;
+            if (valA === null) return sortConfig.direction === "ascending" ? 1 : -1;
+            if (valB === null) return sortConfig.direction === "ascending" ? -1 : 1;
+
             if (sortConfig.key === "month") {
               if ((valA as number) === 0 && (valB as number) !== 0) return sortConfig.direction === "ascending" ? 1 : -1;
               if ((valA as number) !== 0 && (valB as number) === 0) return sortConfig.direction === "ascending" ? -1 : 1;
@@ -1597,7 +1603,7 @@ const FestivalDashboard: React.FC = () => {
                 {(eventTypeFilter === "festivals" || eventTypeFilter === "both") && !isLoading && (
                   <div className="bg-white dark:bg-gray-800 rounded-lg shadow dark:shadow-gray-900/30 overflow-hidden transition-colors duration-300">
                     <h2 className="text-xl font-semibold p-4 text-gray-900 dark:text-gray-100">Festivals</h2>
-                    {isFiltering && eventTypeFilter !== "cityFestivals" ? (
+                    {isFiltering ? (
                       <div className="text-center p-6">
                         <p>Festival-Daten werden gefiltert...</p>
                       </div>
@@ -1892,11 +1898,11 @@ const FestivalDashboard: React.FC = () => {
                     (!isLoadingCityFestivals && (eventTypeFilter === "cityFestivals" || eventTypeFilter === "both")) ) && 
                   (filteredFestivals.length > 0 || filteredCityFestivals.length > 0) ? (
                   <EventsMap
-                    festivals={filteredFestivals} 
-                    cityFestivals={filteredCityFestivals} 
-                    eventTypeFilter={eventTypeFilter} 
+                    festivals={filteredFestivals}
+                    cityFestivals={filteredCityFestivals}
+                    eventTypeFilter={eventTypeFilter}
                     showHeatmap={showHeatmap}
-                    heatmapMode={heatmapMode} {/* Neue Prop */}
+                    heatmapMode={heatmapMode}
                   />
                 ) : (
                   <p className="text-center p-10">
@@ -1907,7 +1913,9 @@ const FestivalDashboard: React.FC = () => {
             ) : view === "calendar" ? (
               <div className="p-6 bg-white dark:bg-gray-800 transition-colors duration-300">
                 <FestivalCalendar
-                  festivals={filteredFestivals} // Calendar currently only shows general festivals
+                  festivals={filteredFestivals}
+                  cityFestivals={filteredCityFestivals}
+                  eventTypeFilter={eventTypeFilter}
                   onSelectFestival={openFestivalDetail}
                   currentMonth={currentMonth}
                   onMonthChange={handleCalendarMonthChange}

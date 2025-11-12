@@ -36,7 +36,7 @@ export async function GET() {
       // Extract estimated duration from date if available
       let calculatedDuration = 1
       if (item.Datum && (item.Datum.includes("–") || item.Datum.includes("-"))) {
-        const dates = item.Datum.split(/[–-]/).map((d) => d.trim())
+        const dates = item.Datum.split(/[–-]/).map((d: string) => d.trim())
         if (dates.length === 2) {
           // Try to extract dates
           const startMatch = dates[0].match(/(\d{1,2})\.(\d{1,2})\.(\d{4})/)

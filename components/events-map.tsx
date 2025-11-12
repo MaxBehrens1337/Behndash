@@ -1,33 +1,16 @@
 "use client";
 
-import type React from 'react';
+import React from 'react';
 import { MapContainer, TileLayer, Marker, Popup } from 'react-leaflet';
 import 'leaflet/dist/leaflet.css';
-import L from 'leaflet'; // Import L für custom icons
+import L, { LatLngTuple } from 'leaflet'; // Import L für custom icons
+// @ts-ignore - no type definitions available for react-leaflet-heatmap-layer-v3
+import * as HeatmapLayerImport from 'react-leaflet-heatmap-layer-v3';
+const HeatmapLayer = (HeatmapLayerImport as any).default || HeatmapLayerImport;
+import type { Festival, CityFestival } from './festival-dashboard';
 
-// Temporäre Typdefinitionen (später auslagern in types/events.ts)
-interface Festival { // General festival type
-  id: number;
-  name: string; // Used for popup
-  lat: number | null;
-  lon: number | null;
-  location?: string; // Optional, für Popup
-  // Consider adding 'eventType' if you want to pass a unified list later
-}
-
-interface CityFestival { // Specific for city festivals
-  id: number;
-  festName: string; // Name of the city festival
-  stadt?: string;    // City name, used for popup
-  lat: number | null;
-  lon: number | null;
-  // Consider adding 'eventType'
-}
-// Ende temporäre Typdefinitionen
-
-import HeatmapLayer from 'react-leaflet-heatmap-layer-v3';
-
-import L, { HeatLatLngTuple } from 'leaflet'; // Import L für custom icons and HeatLatLngTuple
+// Define HeatLatLngTuple type for leaflet.heat
+type HeatLatLngTuple = [number, number, number]; // [lat, lng, intensity]
 
 interface EventsMapProps {
   festivals: Festival[];
@@ -68,14 +51,14 @@ const EventsMap: React.FC<EventsMapProps> = ({ festivals, cityFestivals, eventTy
   const validFestivals = festivals.filter(f => f.lat !== null && f.lon !== null && typeof f.visitors === 'number');
   const validCityFestivals = cityFestivals.filter(cf => cf.lat !== null && cf.lon !== null && typeof cf.besucher === 'number');
 
-  let heatMapData: L.HeatLatLngTuple[] = [];
+  let heatMapData: HeatLatLngTuple[] = [];
   if (showHeatmap) {
-    const processEvent = (event: Festival | CityFestival, isCityFestival: boolean): L.HeatLatLngTuple | null => {
+    const processEvent = (event: Festival | CityFestival, isCityFestival: boolean): HeatLatLngTuple | null => {
       if (event.lat === null || event.lon === null) return null;
       let intensity = 1;
       if (heatmapMode === "visitors") {
         const visitors = isCityFestival ? (event as CityFestival).besucher : (event as Festival).visitors;
-        intensity = visitors > 0 ? visitors : 1; 
+        intensity = visitors && visitors > 0 ? visitors : 1;
       }
       return [event.lat, event.lon, intensity];
     };
@@ -108,9 +91,9 @@ const EventsMap: React.FC<EventsMapProps> = ({ festivals, cityFestivals, eventTy
       {showHeatmap && heatMapData.length > 0 && (
         <HeatmapLayer
           points={heatMapData}
-          longitudeExtractor={(m: L.HeatLatLngTuple) => m[1]}
-          latitudeExtractor={(m: L.HeatLatLngTuple) => m[0]}
-          intensityExtractor={(m: L.HeatLatLngTuple) => m[2]} // Use the third element for intensity
+          longitudeExtractor={(m: HeatLatLngTuple) => m[1]}
+          latitudeExtractor={(m: HeatLatLngTuple) => m[0]}
+          intensityExtractor={(m: HeatLatLngTuple) => m[2]} // Use the third element for intensity
           radius={heatmapMode === 'density' ? 20 : 30}
           blur={heatmapMode === 'density' ? 15 : 25}
           max={heatmapMode === 'visitors' ? 50000 : 1} // Adjusted max based on mode

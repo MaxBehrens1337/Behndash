@@ -2,7 +2,7 @@
 
 import { Users, MapPin } from "lucide-react"
 
-import type { SalesRepresentative } from "@/utils/sales-rep-data"
+import type { SalesRepresentative } from "@/utils/event-rep-data"
 
 interface SalesRepOverviewProps {
   salesReps: SalesRepresentative[]
